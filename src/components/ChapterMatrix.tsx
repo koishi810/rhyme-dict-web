@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import type { Chapter } from '@/lib/types';
 import { AXIS_COLORS } from '@/lib/rhymeColors';

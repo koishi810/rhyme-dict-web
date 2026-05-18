@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   basePath: '/rhyme-dict-web',
   assetPrefix: '/rhyme-dict-web',
+  turbopack: { root: process.cwd() },
 };
 
 export default nextConfig;
