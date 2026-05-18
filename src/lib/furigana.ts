@@ -1,4 +1,4 @@
-import kuromoji from 'kuromoji';
+import * as kuromoji from 'kuromoji';
 import path from 'path';
 
 let _promise: Promise<kuromoji.Tokenizer<kuromoji.IpadicFeatures>> | null = null;

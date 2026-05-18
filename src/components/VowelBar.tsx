@@ -174,21 +174,16 @@ export function RhymeLineDisplay({
     const segIdx = charK >= 0 ? moraSegIndices[charK] : undefined;
     const char = segIdx !== undefined ? segments[segIdx] : '';
 
-    // Determine annotation kana:
-    // If this character has a kuromoji reading → use it (kanji case)
-    // Else if the character is kana → use its own vowel kana from MORA_CONFIG
-    let annotation = cfg.label; // fallback: vowel kana from pattern
-    if (segIdx !== undefined) {
-      // compute char offset in original text
+    // Annotation logic:
+    // - Kana chars: NO annotation (the char itself is the reading)
+    // - Kanji/others: show kuromoji reading if available, else vowel kana fallback
+    const isKana = char ? /^[ぁ-ゖァ-ヶー]+$/.test(char) : false;
+    let annotation: string | null = null;
+    if (!isKana && segIdx !== undefined) {
       let charOffset = 0;
       for (let s = 0; s < segIdx; s++) charOffset += [...segments[s]].length;
       const r = readingMap.get(charOffset);
-      if (r) {
-        annotation = r; // full kana reading from kuromoji
-      } else if (/^[ぁ-ゖァ-ヶー]+$/.test(char)) {
-        // kana char: show its own vowel kana from the pattern
-        annotation = cfg.label;
-      }
+      annotation = r ?? cfg.label; // kuromoji reading or vowel kana fallback
     }
 
     const dimmed = matchPositions ? !matchPositions.has(pi) : false;
@@ -221,7 +216,8 @@ export function RhymeLineDisplay({
             const { cfg, char, annotation, dimmed } = col;
 
             // Render annotation kana — might be multiple kana (e.g. "きず")
-            const annoSegs = segmentMoras(annotation);
+            // kana chars are self-reading, no annotation needed
+            const annoSegs = annotation ? segmentMoras(annotation) : [];
             return (
               <div
                 key={pi}
@@ -245,14 +241,14 @@ export function RhymeLineDisplay({
                     </span>
                   ))}
                 </div>
-                {/* Character */}
+                {/* Character: kana gets vowel color, kanji stays neutral */}
                 <span
                   style={{
                     fontSize: 14,
                     lineHeight: 1.1,
-                    color: char && /^[ぁ-ゖァ-ヶー]+$/.test(char) ? cfg.color : 'var(--tx-1)',
+                    color: (char && annoSegs.length === 0 && !!char) ? cfg.color : 'var(--tx-1)',
                     opacity: dimmed ? 0.35 : 1,
-                    fontWeight: char && /^[ぁ-ゖァ-ヶー]+$/.test(char) ? 700 : 500,
+                    fontWeight: (char && annoSegs.length === 0 && !!char) ? 700 : 500,
                   }}
                 >
                   {char || ' '}
