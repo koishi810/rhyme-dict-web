@@ -2,8 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSongBySlug, getAllSongs } from '@/lib/parseSong';
 import { getColorForGroup } from '@/lib/rhymeColors';
+import { tokenize, type FuriToken } from '@/lib/furigana';
 import LyricHighlighter from '@/components/LyricHighlighter';
-import { VowelBar, VowelLegend, AnnotatedText, VowelLine, computeMatchPositions, maxPatternLength } from '@/components/VowelBar';
+import { VowelBar, VowelLegend, RhymeLineDisplay, computeMatchPositions, maxPatternLength } from '@/components/VowelBar';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,6 +26,22 @@ export default async function SongPage({ params }: Props) {
   const { slug } = await params;
   const song = getSongBySlug(decodeURIComponent(slug));
   if (!song) notFound();
+
+  // Pre-compute kuromoji readings for all rhyme group lines (server-side)
+  const allLines = song.rhymeGroups.flatMap(g => g.lines);
+  const lineReadings = new Map<string, FuriToken[]>();
+  await Promise.all(
+    allLines
+      .filter(l => l.vowelPattern)
+      .map(async l => {
+        try {
+          const tokens = await tokenize(l.text);
+          lineReadings.set(l.text, tokens);
+        } catch {
+          // silently skip if tokenization fails for a line
+        }
+      })
+  );
 
   return (
     <div className="space-y-8">
@@ -133,23 +150,15 @@ export default async function SongPage({ params }: Props) {
                 {group.lines.length > 0 && (
                   <div className="space-y-1.5">
                     {group.lines.map((line, li) => (
-                      <div key={li} className="rounded-lg px-3 py-2 space-y-2" style={{ background: 'rgba(0,0,0,0.25)' }}>
+                      <div key={li} className="rounded-lg px-3 py-2" style={{ background: 'rgba(0,0,0,0.25)' }}>
                         {line.vowelPattern ? (
-                          <>
-                            <div className="text-sm">
-                              <AnnotatedText
-                                text={line.text}
-                                vowelPattern={line.vowelPattern}
-                                matchPositions={patterns.length >= 2 ? matchPositions : undefined}
-                                maxLength={maxLen}
-                              />
-                            </div>
-                            <VowelLine
-                              pattern={line.vowelPattern}
-                              matchPositions={patterns.length >= 2 ? matchPositions : undefined}
-                              maxLength={maxLen}
-                            />
-                          </>
+                          <RhymeLineDisplay
+                            text={line.text}
+                            vowelPattern={line.vowelPattern}
+                            matchPositions={patterns.length >= 2 ? matchPositions : undefined}
+                            maxLength={maxLen}
+                            readings={lineReadings.get(line.text)}
+                          />
                         ) : (
                           <span className="text-sm" style={{ color: 'var(--tx-1)' }}>{line.text}</span>
                         )}
