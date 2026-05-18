@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Artist, ArtistSongEntry } from './types';
 
-const ARTISTS_DIR = path.join(process.cwd(), '../韻辞典/アーティスト');
+const ARTISTS_DIR = path.join(process.cwd(), 'data/アーティスト');
 
 function slugifyArtist(name: string): string {
   return encodeURIComponent(name);

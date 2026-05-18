@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import type { Song, RhymeGroup, RhymeLine } from './types';
 
-const SONGS_DIR = path.join(process.cwd(), '../韻辞典/曲');
+const SONGS_DIR = path.join(process.cwd(), 'data/曲');
 
 function slugify(filename: string): string {
   return filename.replace(/\.md$/, '');

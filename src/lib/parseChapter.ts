@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import type { Chapter, ChapterAxis, RepresentativeSong } from './types';
 
-const CHAPTERS_DIR = path.join(process.cwd(), '../韻辞典/分類');
+const CHAPTERS_DIR = path.join(process.cwd(), 'data/分類');
 
 export const CHAPTER_META: Record<string, {
   number: number;
