@@ -1,4 +1,4 @@
-// Phonetic aperture (mouth openness) → bar height
+// Phonetic aperture (mouth openness) → y-position on line chart
 // Vowel color is fixed per vowel quality
 const MORA_CONFIG: Record<string, { color: string; height: number; label: string }> = {
   a: { color: '#fb7185', height: 32, label: 'a' },   // rose    — fully open
@@ -13,14 +13,8 @@ const MORA_CONFIG: Record<string, { color: string; height: number; label: string
 // Small kana that combine with the preceding kana to form one mora
 const SMALL_KANA = new Set('ぁぃぅぇぉゃゅょァィゥェォャュョ');
 
-/**
- * Split Japanese text into mora-level segments (from left to right).
- * Compound kana (e.g. きゃ, しょ) are kept as one segment.
- * Punctuation / spaces / ASCII letters are kept as individual segments
- * but won't be color-matched (they are skipped in mora counting).
- */
 function segmentMoras(text: string): string[] {
-  const chars = [...text]; // Unicode-aware
+  const chars = [...text];
   const segments: string[] = [];
   let i = 0;
   while (i < chars.length) {
@@ -37,20 +31,30 @@ function segmentMoras(text: string): string[] {
   return segments;
 }
 
-// Characters that should not count as a mora (punctuation, spaces, etc.)
 const NON_MORA = /^[\s　。、「」『』【】（）｛｝〔〕［］〈〉《》・…―〜！？!?.,\-\/\\()\[\]{}'"]+$/;
 
 function isMoraChar(seg: string): boolean {
   return !NON_MORA.test(seg);
 }
 
-// Pad a mora array on the LEFT with nulls for right-alignment
 function padLeft(moras: string[], maxLen: number): (string | null)[] {
   const pad = maxLen - moras.length;
   return [...Array(pad).fill(null), ...moras];
 }
 
-// ─── VowelBar ───────────────────────────────────────────────────────────────
+// Right-align segments to moras. Returns the map and the moraOffset.
+function buildSegMoraMap(text: string, moras: string[]) {
+  const moraCount = moras.length;
+  const segments = segmentMoras(text);
+  const moraSegIndices: number[] = [];
+  for (let i = segments.length - 1; i >= 0 && moraSegIndices.length < moraCount; i--) {
+    if (isMoraChar(segments[i])) moraSegIndices.unshift(i);
+  }
+  const moraOffset = moraCount - moraSegIndices.length;
+  return { segments, moraSegIndices, moraOffset };
+}
+
+// ─── VowelBar (kept for the header vowel-skeleton display) ──────────────────
 
 interface VowelBarProps {
   pattern: string;
@@ -100,155 +104,144 @@ export function VowelBar({ pattern, matchPositions, compact = false, maxLength }
   );
 }
 
-// ─── ColorizedText ──────────────────────────────────────────────────────────
+// ─── AnnotatedText ───────────────────────────────────────────────────────────
+// Characters are neutral-colored; the vowel letter floats above as ruby annotation.
 
-interface ColorizedTextProps {
+interface AnnotatedTextProps {
   text: string;
   vowelPattern: string;
   matchPositions?: Set<number>;
-  /** padded total length (same value passed to VowelBar) */
   maxLength?: number;
 }
 
-/**
- * Renders the lyric line with characters colored to match their corresponding
- * vowel bar. Coloring starts from the END of the text (tail = rhyme zone).
- * Non-mora characters (punctuation, spaces) are rendered in gray without color.
- */
-export function ColorizedText({ text, vowelPattern, matchPositions, maxLength }: ColorizedTextProps) {
+export function AnnotatedText({ text, vowelPattern, matchPositions, maxLength }: AnnotatedTextProps) {
   const moras = vowelPattern.split('-').filter(Boolean);
   const moraCount = moras.length;
-  // offset in the padded position array (needed to look up matchPositions correctly)
   const paddingOffset = maxLength != null ? maxLength - moraCount : 0;
+  const { segments, moraSegIndices, moraOffset } = buildSegMoraMap(text, moras);
 
-  const segments = segmentMoras(text);
-
-  // Walk from the end: assign each mora to the last N mora-chars in the text
-  // First, collect the indices of mora-bearing segments (right to left)
-  const moraIndices: number[] = [];
-  for (let i = segments.length - 1; i >= 0 && moraIndices.length < moraCount; i--) {
-    if (isMoraChar(segments[i])) moraIndices.unshift(i); // keep left-to-right order
-  }
-  // moraIndices[k] → the segment index that maps to moras[k]
-
-  const colorMap = new Map<number, { mora: string; paddedPos: number }>();
-  moraIndices.forEach((segIdx, k) => {
-    colorMap.set(segIdx, { mora: moras[k], paddedPos: paddingOffset + k });
+  const segToMora = new Map<number, { mora: string; paddedPos: number }>();
+  moraSegIndices.forEach((segIdx, k) => {
+    const moraIdx = moraOffset + k;
+    segToMora.set(segIdx, { mora: moras[moraIdx], paddedPos: paddingOffset + moraIdx });
   });
 
   return (
-    <span>
+    <span style={{ lineHeight: 2.2 }}>
       {segments.map((seg, i) => {
-        const entry = colorMap.get(i);
+        const entry = segToMora.get(i);
         if (!entry) {
           return (
-            <span key={i} className="text-gray-800">
-              {seg}
-            </span>
+            <span key={i} style={{ color: 'var(--tx-2)' }}>{seg}</span>
           );
         }
         const cfg = MORA_CONFIG[entry.mora];
-        if (!cfg) return <span key={i} className="text-gray-800">{seg}</span>;
-
+        if (!cfg) return <span key={i} style={{ color: 'var(--tx-1)' }}>{seg}</span>;
         const dimmed = matchPositions ? !matchPositions.has(entry.paddedPos) : false;
+
         return (
-          <span
-            key={i}
-            style={{
+          <ruby key={i}>
+            <span style={{ color: 'var(--tx-1)', fontWeight: 600 }}>{seg}</span>
+            <rt style={{
               color: cfg.color,
-              opacity: dimmed ? 0.35 : 1,
-              fontWeight: dimmed ? 400 : 700,
-              transition: 'opacity 0.15s',
-            }}
-          >
-            {seg}
-          </span>
+              opacity: dimmed ? 0.3 : 1,
+              fontSize: '0.7em',
+              fontWeight: 700,
+              letterSpacing: 0,
+            }}>
+              {cfg.label}
+            </rt>
+          </ruby>
         );
       })}
     </span>
   );
 }
 
-// ─── RhymeLineDisplay ────────────────────────────────────────────────────────
-// Unified component: characters sit directly above their vowel bars.
+// ─── VowelLine (SVG line chart) ──────────────────────────────────────────────
 
-interface RhymeLineDisplayProps {
-  text: string;
-  vowelPattern: string;
-  matchPositions?: Set<number>;
-  maxLength?: number;
-}
+const COL_W = 16;
+const COL_GAP = 4;
+const CHART_H = 44;
+const TOP_PAD = 6;
 
-export function RhymeLineDisplay({ text, vowelPattern, matchPositions, maxLength }: RhymeLineDisplayProps) {
-  const moras = vowelPattern.split('-').filter(Boolean);
-  const moraCount = moras.length;
-  const totalCols = maxLength ?? moraCount;
-  const paddingOffset = totalCols - moraCount;
+export function VowelLine({ pattern, matchPositions, maxLength }: VowelBarProps) {
+  const raw = pattern.split('-').filter(Boolean);
+  const moras = maxLength != null ? padLeft(raw, maxLength) : raw;
+  const n = moras.length;
+  const svgW = n * COL_W + (n - 1) * COL_GAP;
 
-  const segments = segmentMoras(text);
-
-  // Collect mora-bearing segment indices from the right (up to moraCount)
-  const moraSegIndices: number[] = [];
-  for (let i = segments.length - 1; i >= 0 && moraSegIndices.length < moraCount; i--) {
-    if (isMoraChar(segments[i])) moraSegIndices.unshift(i);
-  }
-
-  // Right-align chars to moras: kanji can represent multiple moras,
-  // so chars < moras is normal. We shift chars to align with the right end.
-  const segCount = moraSegIndices.length;
-  const moraOffset = moraCount - segCount; // leftward gap when kanji absorbs extra moras
-
-  // Everything before the first rhyme-mora segment
-  const splitAt = moraSegIndices[0] ?? segments.length;
-  const prefixText = segments.slice(0, splitAt).join('');
-
-  const colW = 20;
+  type Pt = { x: number; y: number; mora: string; color: string; idx: number };
+  const pts: (Pt | null)[] = moras.map((mora, i) => {
+    if (mora === null) return null;
+    const cfg = MORA_CONFIG[mora] ?? { color: '#e2e8f0', height: 8 };
+    const x = i * (COL_W + COL_GAP) + COL_W / 2;
+    const y = CHART_H - TOP_PAD - cfg.height;
+    return { x, y, mora, color: cfg.color, idx: i };
+  });
 
   return (
-    <div className="flex items-end" style={{ gap: 2 }}>
-      {prefixText && (
-        <span className="self-end text-sm leading-none pb-px" style={{ color: 'var(--tx-2)', marginRight: 2 }}>
-          {prefixText}
-        </span>
-      )}
-      {Array.from({ length: totalCols }, (_, pi) => {
-        if (pi < paddingOffset) {
-          return <div key={pi} style={{ width: colW, flexShrink: 0 }} />;
-        }
-        const moraIdx = pi - paddingOffset;
-        const mora = moras[moraIdx];
-        // Right-aligned: char for mora[moraIdx] lives at moraSegIndices[moraIdx - moraOffset]
-        const charIdx = moraIdx - moraOffset;
-        const segIdx = charIdx >= 0 ? moraSegIndices[charIdx] : undefined;
-        const char = segIdx !== undefined ? segments[segIdx] : '';
-        const cfg = MORA_CONFIG[mora] ?? { color: '#e2e8f0', height: 8, label: mora };
-        const dimmed = matchPositions ? !matchPositions.has(pi) : false;
-        const matched = matchPositions?.has(pi) ?? false;
+    <div>
+      <svg
+        width={svgW}
+        height={CHART_H}
+        style={{ display: 'block', overflow: 'visible' }}
+      >
+        {/* connecting lines between adjacent non-null points */}
+        {pts.map((pt, i) => {
+          if (!pt || i === n - 1) return null;
+          const next = pts[i + 1];
+          if (!next) return null;
+          const dimA = matchPositions ? !matchPositions.has(pt.idx) : false;
+          const dimB = matchPositions ? !matchPositions.has(next.idx) : false;
+          return (
+            <line
+              key={`l${i}`}
+              x1={pt.x} y1={pt.y}
+              x2={next.x} y2={next.y}
+              stroke={pt.color}
+              strokeWidth={1.5}
+              opacity={(dimA && dimB) ? 0.12 : 0.45}
+              strokeLinecap="round"
+            />
+          );
+        })}
 
-        return (
-          <div key={pi} className="flex flex-col items-center" style={{ width: colW, flexShrink: 0, gap: 3 }}>
-            <span style={{
-              fontSize: 13,
-              lineHeight: 1,
-              color: cfg.color,
-              opacity: dimmed ? 0.35 : 1,
-              fontWeight: dimmed ? 400 : 700,
-              transition: 'opacity 0.15s',
-            }}>
-              {char}
-            </span>
-            <div style={{
-              width: colW - 6,
-              height: cfg.height,
-              backgroundColor: cfg.color,
-              borderRadius: '3px 3px 0 0',
-              opacity: dimmed ? 0.22 : 1,
-              boxShadow: matched ? `0 0 0 2px ${cfg.color}44` : 'none',
-              transition: 'opacity 0.15s',
-            }} title={mora} />
-          </div>
-        );
-      })}
+        {/* dots */}
+        {pts.map((pt, i) => {
+          if (!pt) return null;
+          const dimmed = matchPositions ? !matchPositions.has(pt.idx) : false;
+          const matched = matchPositions?.has(pt.idx) ?? false;
+          return (
+            <g key={`d${i}`}>
+              {matched && (
+                <circle cx={pt.x} cy={pt.y} r={8} fill={pt.color} opacity={0.15} />
+              )}
+              <circle
+                cx={pt.x} cy={pt.y} r={matched ? 5 : 3.5}
+                fill={pt.color}
+                opacity={dimmed ? 0.18 : 1}
+              />
+            </g>
+          );
+        })}
+      </svg>
+
+      {/* vowel labels below */}
+      <div className="flex" style={{ gap: COL_GAP, marginTop: 2 }}>
+        {moras.map((mora, i) => {
+          if (mora === null) return <div key={i} style={{ width: COL_W }} />;
+          const cfg = MORA_CONFIG[mora] ?? { color: '#e2e8f0', label: mora };
+          const dimmed = matchPositions ? !matchPositions.has(i) : false;
+          return (
+            <div key={i} style={{ width: COL_W, textAlign: 'center' }}>
+              <span style={{ fontSize: 8, color: cfg.color, fontWeight: 600, opacity: dimmed ? 0.18 : 1 }}>
+                {cfg.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -295,10 +288,9 @@ export function VowelLegend() {
             <span
               style={{
                 display: 'inline-block',
-                width: 8,
-                height: cfg.height * 0.5,
+                width: 7, height: 7,
                 backgroundColor: cfg.color,
-                borderRadius: 1,
+                borderRadius: '50%',
                 verticalAlign: 'middle',
               }}
             />
@@ -306,7 +298,7 @@ export function VowelLegend() {
           </span>
         );
       })}
-      <span className="ml-1" style={{ color: 'var(--tx-3)' }}>｜ 高さ＝口の開き、色＝母音種類。グレーアウトは韻外</span>
+      <span className="ml-1" style={{ color: 'var(--tx-3)' }}>｜ 高さ＝口の開き、色＝母音種類</span>
     </div>
   );
 }
