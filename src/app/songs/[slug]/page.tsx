@@ -10,19 +10,19 @@ interface Props {
 
 export async function generateStaticParams() {
   const songs = getAllSongs();
-  return songs.map(s => ({ slug: encodeURIComponent(s.slug) }));
+  return songs.map(s => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const song = getSongBySlug(decodeURIComponent(slug));
+  const song = getSongBySlug(slug);
   if (!song) return {};
   return { title: `${song.artist} — ${song.title} | 韻辞典` };
 }
 
 export default async function SongPage({ params }: Props) {
   const { slug } = await params;
-  const song = getSongBySlug(decodeURIComponent(slug));
+  const song = getSongBySlug(slug);
   if (!song) notFound();
 
   return (

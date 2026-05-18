@@ -5,11 +5,11 @@ import type { Artist, ArtistSongEntry } from './types';
 const ARTISTS_DIR = path.join(process.cwd(), 'data/アーティスト');
 
 function slugifyArtist(name: string): string {
-  return encodeURIComponent(name);
+  return name;
 }
 
 export function decodeArtistSlug(slug: string): string {
-  return decodeURIComponent(slug);
+  return slug;
 }
 
 function parseSongTable(content: string): ArtistSongEntry[] {

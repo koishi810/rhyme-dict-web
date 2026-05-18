@@ -11,17 +11,17 @@ interface Props {
 
 export async function generateStaticParams() {
   const chapters = getAllChapters();
-  return chapters.map(c => ({ id: encodeURIComponent(c.id) }));
+  return chapters.map(c => ({ id: c.id }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  return { title: `${decodeURIComponent(id)} | 韻辞典` };
+  return { title: `${id} | 韻辞典` };
 }
 
 export default async function ChapterPage({ params }: Props) {
   const { id } = await params;
-  const chapterId = decodeURIComponent(id);
+  const chapterId = id;
   const chapter = getChapterById(chapterId);
   if (!chapter) notFound();
 
