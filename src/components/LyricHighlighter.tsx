@@ -9,7 +9,6 @@ interface Props {
   rhymeGroups: RhymeGroup[];
 }
 
-// Build a map from normalized line text → rhyme group index
 function buildLineMap(rhymeGroups: RhymeGroup[]): Map<string, number> {
   const map = new Map<string, number>();
   rhymeGroups.forEach((group, idx) => {
@@ -36,7 +35,6 @@ export default function LyricHighlighter({ lyrics, rhymeGroups }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Legend */}
       {rhymeGroups.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {rhymeGroups.map((group, idx) => {
@@ -50,7 +48,7 @@ export default function LyricHighlighter({ lyrics, rhymeGroups }: Props) {
                   flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
                   border transition-all
                   ${color.bg} ${color.border} ${color.text}
-                  ${isActive ? 'ring-2 ring-offset-1 ring-current shadow-md' : 'opacity-70 hover:opacity-100'}
+                  ${isActive ? 'ring-2 ring-offset-2 ring-offset-[#13131e] ring-current shadow-lg' : 'opacity-60 hover:opacity-100'}
                 `}
               >
                 <span className={`w-2 h-2 rounded-full ${color.dot}`} />
@@ -60,13 +58,12 @@ export default function LyricHighlighter({ lyrics, rhymeGroups }: Props) {
               </button>
             );
           })}
-          <span className="text-xs text-gray-400 self-center ml-1">
+          <span className="text-xs self-center ml-1" style={{ color: 'var(--tx-3)' }}>
             {totalHighlighted}行に韻あり
           </span>
         </div>
       )}
 
-      {/* Lyrics */}
       <div className="font-mono text-sm leading-7 whitespace-pre-wrap">
         {lines.map((line, i) => {
           const norm = normalizeText(line);
@@ -82,7 +79,8 @@ export default function LyricHighlighter({ lyrics, rhymeGroups }: Props) {
             return (
               <div
                 key={i}
-                className={`px-2 py-0.5 rounded transition-opacity ${isDimmed ? 'opacity-20' : 'text-gray-700'}`}
+                className={`px-2 py-0.5 rounded transition-opacity ${isDimmed ? 'opacity-10' : ''}`}
+                style={{ color: isDimmed ? undefined : 'var(--tx-2)' }}
               >
                 {line}
               </div>
@@ -96,7 +94,7 @@ export default function LyricHighlighter({ lyrics, rhymeGroups }: Props) {
               className={`
                 px-2 py-0.5 rounded border-l-[3px] transition-all cursor-pointer
                 ${color.bg} ${color.border} ${color.text}
-                ${isDimmed ? 'opacity-20' : ''}
+                ${isDimmed ? 'opacity-10' : ''}
                 ${activeGroup === groupIdx ? 'shadow-sm' : ''}
               `}
               onClick={() => setActiveGroup(activeGroup === groupIdx ? null : groupIdx!)}

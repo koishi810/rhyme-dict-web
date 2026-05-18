@@ -13,24 +13,24 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
-      <body className={`${noto.className} bg-gray-50 text-gray-900 min-h-screen`}>
-        <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+      <body className={`${noto.className} min-h-screen`} style={{ background: 'var(--bg-base)', color: 'var(--tx-1)' }}>
+        <header className="sticky top-0 z-40 border-b backdrop-blur-sm" style={{ borderColor: 'var(--bd)', background: 'color-mix(in srgb, var(--bg-surface) 85%, transparent)' }}>
           <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-            <Link href="/" className="font-bold text-lg tracking-tight hover:text-indigo-700 transition-colors">
+            <Link href="/" className="font-bold text-lg tracking-tight hover:text-indigo-400 transition-colors" style={{ color: 'var(--tx-1)' }}>
               韻辞典
             </Link>
-            <nav className="flex items-center gap-5 text-sm text-gray-600">
-              <Link href="/chapters" className="hover:text-gray-900 transition-colors">分類</Link>
-              <Link href="/songs" className="hover:text-gray-900 transition-colors">曲一覧</Link>
-              <Link href="/artists" className="hover:text-gray-900 transition-colors">アーティスト</Link>
+            <nav className="flex items-center gap-5 text-sm" style={{ color: 'var(--tx-2)' }}>
+              <Link href="/chapters" className="hover:text-indigo-400 transition-colors">分類</Link>
+              <Link href="/songs" className="hover:text-indigo-400 transition-colors">曲一覧</Link>
+              <Link href="/artists" className="hover:text-indigo-400 transition-colors">アーティスト</Link>
             </nav>
           </div>
         </header>
         <main className="max-w-5xl mx-auto px-4 py-8">
           {children}
         </main>
-        <footer className="border-t border-gray-200 mt-16">
-          <div className="max-w-5xl mx-auto px-4 py-6 text-xs text-gray-400 text-center">
+        <footer className="border-t mt-16" style={{ borderColor: 'var(--bd)' }}>
+          <div className="max-w-5xl mx-auto px-4 py-6 text-xs text-center" style={{ color: 'var(--tx-3)' }}>
             韻辞典 — 河原繁人氏の音韻論に基づく日本語ラップ韻コーパス
           </div>
         </footer>

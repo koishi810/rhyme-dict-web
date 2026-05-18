@@ -24,10 +24,8 @@ export default async function ArtistPage({ params }: Props) {
   const artist = getArtistBySlug(decodeURIComponent(slug));
   if (!artist) notFound();
 
-  const songs = getSongsByArtist(artist.name)
-    .sort((a, b) => a.year - b.year);
+  const songs = getSongsByArtist(artist.name).sort((a, b) => a.year - b.year);
 
-  // cluster distribution
   const clusterCounts: Record<string, number> = {};
   songs.forEach(s => {
     if (s.clusterName) clusterCounts[s.clusterName] = (clusterCounts[s.clusterName] ?? 0) + 1;
@@ -36,27 +34,25 @@ export default async function ArtistPage({ params }: Props) {
 
   return (
     <div className="space-y-8">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-gray-400 flex items-center gap-2">
-        <Link href="/artists" className="hover:text-gray-700">アーティスト</Link>
+      <nav className="text-sm flex items-center gap-2" style={{ color: 'var(--tx-3)' }}>
+        <Link href="/artists" className="hover:text-indigo-400 transition-colors">アーティスト</Link>
         <span>/</span>
-        <span className="text-gray-700">{artist.name}</span>
+        <span style={{ color: 'var(--tx-1)' }}>{artist.name}</span>
       </nav>
 
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-        <h1 className="text-2xl font-bold">{artist.name}</h1>
-        <div className="text-sm text-gray-500">{songs.length}曲収録</div>
+      <div className="rounded-2xl border p-6 space-y-4" style={{ background: 'var(--bg-surface)', borderColor: 'var(--bd-subtle)' }}>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--tx-1)' }}>{artist.name}</h1>
+        <div className="text-sm" style={{ color: 'var(--tx-2)' }}>{songs.length}曲収録</div>
 
         {sortedClusters.length > 0 && (
           <div>
-            <div className="text-xs text-gray-400 mb-2">韻スタイル傾向</div>
+            <div className="text-xs mb-2" style={{ color: 'var(--tx-3)' }}>韻スタイル傾向</div>
             <div className="flex flex-wrap gap-2">
               {sortedClusters.map(([cluster, count]) => (
                 <Link key={cluster} href={`/chapters/${encodeURIComponent(cluster)}`}>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100 transition-colors cursor-pointer">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border border-indigo-800/60 bg-indigo-950/40 text-indigo-400 hover:bg-indigo-950/70 transition-colors cursor-pointer">
                     {cluster}
-                    <span className="text-indigo-400">{count}</span>
+                    <span className="text-indigo-500">{count}</span>
                   </span>
                 </Link>
               ))}
@@ -65,7 +61,7 @@ export default async function ArtistPage({ params }: Props) {
         )}
 
         {artist.styleAnalysis && (
-          <div className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-4">
+          <div className="text-sm leading-relaxed rounded-xl p-4" style={{ background: 'var(--bg-raised)', color: 'var(--tx-2)' }}>
             {artist.styleAnalysis.split('\n').filter(Boolean).slice(0, 6).map((line, i) => (
               <p key={i} className="mb-1">{line}</p>
             ))}
@@ -73,9 +69,8 @@ export default async function ArtistPage({ params }: Props) {
         )}
       </div>
 
-      {/* Songs */}
       <div>
-        <h2 className="font-bold text-lg mb-4">収録曲</h2>
+        <h2 className="font-bold text-lg mb-4" style={{ color: 'var(--tx-1)' }}>収録曲</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {songs.map(song => (
             <SongCard key={song.slug} song={song} showArtist={false} />

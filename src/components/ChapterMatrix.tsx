@@ -26,22 +26,25 @@ export default function ChapterMatrix({ chapters, songCounts = {} }: Props) {
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${axisColor.badge}`}>
                 {label}
               </span>
-              <p className="text-xs text-gray-500 mt-1">{sublabel}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--tx-3)' }}>{sublabel}</p>
             </div>
             <div className="space-y-2">
               {byAxis(axis).map(chapter => (
                 <Link
                   key={chapter.id}
                   href={`/chapters/${encodeURIComponent(chapter.id)}`}
-                  className={`block rounded-lg p-3 border bg-white/70 hover:bg-white transition-colors group border-gray-100 hover:border-gray-200 hover:shadow-sm`}
+                  className="block rounded-lg p-3 border transition-colors group"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-gray-900 text-sm">{chapter.id}</div>
-                      <div className="text-xs text-gray-500 mt-0.5 leading-snug">{chapter.oneLiner}</div>
+                      <div className="font-bold text-sm" style={{ color: 'var(--tx-1)' }}>{chapter.id}</div>
+                      <div className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--tx-2)' }}>{chapter.oneLiner}</div>
                     </div>
                     {songCounts[chapter.id] !== undefined && (
-                      <span className="text-xs text-gray-400 shrink-0 mt-0.5">
+                      <span className="text-xs shrink-0 mt-0.5" style={{ color: 'var(--tx-3)' }}>
                         {songCounts[chapter.id]}曲
                       </span>
                     )}

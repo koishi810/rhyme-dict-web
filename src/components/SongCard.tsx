@@ -12,23 +12,26 @@ export default function SongCard({ song, showArtist = true }: Props) {
   return (
     <Link
       href={`/songs/${encodeURIComponent(song.slug)}`}
-      className="block rounded-xl border border-gray-100 bg-white p-4 hover:shadow-md hover:border-gray-200 transition-all group"
+      className="block rounded-xl border p-4 transition-all group"
+      style={{ background: 'var(--bg-surface)', borderColor: 'var(--bd-subtle)' }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--bd)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--bd-subtle)'; }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           {showArtist && (
-            <div className="text-xs text-gray-500 mb-0.5 truncate">{song.artist}</div>
+            <div className="text-xs mb-0.5 truncate" style={{ color: 'var(--tx-3)' }}>{song.artist}</div>
           )}
-          <div className="font-semibold text-gray-900 text-sm truncate group-hover:text-indigo-700 transition-colors">
+          <div className="font-semibold text-sm truncate group-hover:text-indigo-400 transition-colors" style={{ color: 'var(--tx-1)' }}>
             {song.title}
           </div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="text-xs text-gray-400">{song.year}</span>
+            <span className="text-xs" style={{ color: 'var(--tx-3)' }}>{song.year}</span>
             {song.genre && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">{song.genre}</span>
+              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-raised)', color: 'var(--tx-2)' }}>{song.genre}</span>
             )}
             {song.clusterName && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">
+              <span className="text-xs px-1.5 py-0.5 rounded border border-indigo-800/60 bg-indigo-950/40 text-indigo-400">
                 {song.clusterName}
               </span>
             )}
@@ -38,13 +41,13 @@ export default function SongCard({ song, showArtist = true }: Props) {
           {STRENGTH_DOTS.map(n => (
             <span
               key={n}
-              className={`w-1.5 h-1.5 rounded-full ${n <= song.strength ? 'bg-indigo-400' : 'bg-gray-200'}`}
+              className={`w-1.5 h-1.5 rounded-full ${n <= song.strength ? 'bg-indigo-400' : 'bg-[#28283c]'}`}
             />
           ))}
         </div>
       </div>
       {song.vowelSkeleton && (
-        <div className="mt-2 font-mono text-xs text-gray-400 truncate">{song.vowelSkeleton}</div>
+        <div className="mt-2 font-mono text-xs truncate" style={{ color: 'var(--tx-3)' }}>{song.vowelSkeleton}</div>
       )}
     </Link>
   );

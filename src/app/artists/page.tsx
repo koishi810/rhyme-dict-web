@@ -6,16 +6,17 @@ export default function ArtistsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">アーティスト一覧</h1>
+      <h1 className="text-2xl font-bold" style={{ color: 'var(--tx-1)' }}>アーティスト一覧</h1>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {artists.map(artist => (
           <Link
             key={artist.slug}
             href={`/artists/${artist.slug}`}
-            className="block bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-gray-200 transition-all"
+            className="block rounded-xl border p-4 transition-all hover:border-[#36365a]"
+            style={{ background: 'var(--bg-surface)', borderColor: 'var(--bd-subtle)' }}
           >
-            <div className="font-semibold text-gray-900 text-sm truncate">{artist.name}</div>
-            <div className="text-xs text-gray-400 mt-1">{artist.songCount}曲</div>
+            <div className="font-semibold text-sm truncate" style={{ color: 'var(--tx-1)' }}>{artist.name}</div>
+            <div className="text-xs mt-1" style={{ color: 'var(--tx-3)' }}>{artist.songCount}曲</div>
           </Link>
         ))}
       </div>
