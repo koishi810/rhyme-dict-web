@@ -38,7 +38,7 @@ function segmentMoras(text: string): string[] {
 }
 
 // Characters that should not count as a mora (punctuation, spaces, etc.)
-const NON_MORA = /^[\s　。、「」『』【】・…―〜！？!?.,\-\/\\()\[\]{}'"]+$/;
+const NON_MORA = /^[\s　。、「」『』【】（）｛｝〔〕［］〈〉《》・…―〜！？!?.,\-\/\\()\[\]{}'"]+$/;
 
 function isMoraChar(seg: string): boolean {
   return !NON_MORA.test(seg);
@@ -166,6 +166,83 @@ export function ColorizedText({ text, vowelPattern, matchPositions, maxLength }:
         );
       })}
     </span>
+  );
+}
+
+// ─── RhymeLineDisplay ────────────────────────────────────────────────────────
+// Unified component: characters sit directly above their vowel bars.
+
+interface RhymeLineDisplayProps {
+  text: string;
+  vowelPattern: string;
+  matchPositions?: Set<number>;
+  maxLength?: number;
+}
+
+export function RhymeLineDisplay({ text, vowelPattern, matchPositions, maxLength }: RhymeLineDisplayProps) {
+  const moras = vowelPattern.split('-').filter(Boolean);
+  const moraCount = moras.length;
+  const totalCols = maxLength ?? moraCount;
+  const paddingOffset = totalCols - moraCount;
+
+  const segments = segmentMoras(text);
+
+  // Collect mora-bearing segment indices from the right
+  const moraSegIndices: number[] = [];
+  for (let i = segments.length - 1; i >= 0 && moraSegIndices.length < moraCount; i--) {
+    if (isMoraChar(segments[i])) moraSegIndices.unshift(i);
+  }
+
+  // Everything before the first rhyme-mora segment
+  const splitAt = moraSegIndices[0] ?? segments.length;
+  const prefixText = segments.slice(0, splitAt).join('');
+
+  const colW = 20;
+
+  return (
+    <div className="flex items-end" style={{ gap: 2 }}>
+      {prefixText && (
+        <span className="self-end text-sm leading-none pb-px" style={{ color: 'var(--tx-2)', marginRight: 2 }}>
+          {prefixText}
+        </span>
+      )}
+      {Array.from({ length: totalCols }, (_, pi) => {
+        if (pi < paddingOffset) {
+          return <div key={pi} style={{ width: colW, flexShrink: 0 }} />;
+        }
+        const moraIdx = pi - paddingOffset;
+        const mora = moras[moraIdx];
+        const segIdx = moraSegIndices[moraIdx];
+        const char = segIdx !== undefined ? segments[segIdx] : '';
+        const cfg = MORA_CONFIG[mora] ?? { color: '#e2e8f0', height: 8, label: mora };
+        const dimmed = matchPositions ? !matchPositions.has(pi) : false;
+        const matched = matchPositions?.has(pi) ?? false;
+
+        return (
+          <div key={pi} className="flex flex-col items-center" style={{ width: colW, flexShrink: 0, gap: 3 }}>
+            <span style={{
+              fontSize: 13,
+              lineHeight: 1,
+              color: cfg.color,
+              opacity: dimmed ? 0.35 : 1,
+              fontWeight: dimmed ? 400 : 700,
+              transition: 'opacity 0.15s',
+            }}>
+              {char}
+            </span>
+            <div style={{
+              width: colW - 6,
+              height: cfg.height,
+              backgroundColor: cfg.color,
+              borderRadius: '3px 3px 0 0',
+              opacity: dimmed ? 0.22 : 1,
+              boxShadow: matched ? `0 0 0 2px ${cfg.color}44` : 'none',
+              transition: 'opacity 0.15s',
+            }} title={mora} />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
