@@ -187,11 +187,16 @@ export function RhymeLineDisplay({ text, vowelPattern, matchPositions, maxLength
 
   const segments = segmentMoras(text);
 
-  // Collect mora-bearing segment indices from the right
+  // Collect mora-bearing segment indices from the right (up to moraCount)
   const moraSegIndices: number[] = [];
   for (let i = segments.length - 1; i >= 0 && moraSegIndices.length < moraCount; i--) {
     if (isMoraChar(segments[i])) moraSegIndices.unshift(i);
   }
+
+  // Right-align chars to moras: kanji can represent multiple moras,
+  // so chars < moras is normal. We shift chars to align with the right end.
+  const segCount = moraSegIndices.length;
+  const moraOffset = moraCount - segCount; // leftward gap when kanji absorbs extra moras
 
   // Everything before the first rhyme-mora segment
   const splitAt = moraSegIndices[0] ?? segments.length;
@@ -212,7 +217,9 @@ export function RhymeLineDisplay({ text, vowelPattern, matchPositions, maxLength
         }
         const moraIdx = pi - paddingOffset;
         const mora = moras[moraIdx];
-        const segIdx = moraSegIndices[moraIdx];
+        // Right-aligned: char for mora[moraIdx] lives at moraSegIndices[moraIdx - moraOffset]
+        const charIdx = moraIdx - moraOffset;
+        const segIdx = charIdx >= 0 ? moraSegIndices[charIdx] : undefined;
         const char = segIdx !== undefined ? segments[segIdx] : '';
         const cfg = MORA_CONFIG[mora] ?? { color: '#e2e8f0', height: 8, label: mora };
         const dimmed = matchPositions ? !matchPositions.has(pi) : false;
