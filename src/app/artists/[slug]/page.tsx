@@ -15,13 +15,13 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const artist = getArtistBySlug(slug);
+  const artist = getArtistBySlug(decodeURIComponent(slug));
   return { title: artist ? `${artist.name} | 韻辞典` : '韻辞典' };
 }
 
 export default async function ArtistPage({ params }: Props) {
   const { slug } = await params;
-  const artist = getArtistBySlug(slug);
+  const artist = getArtistBySlug(decodeURIComponent(slug));
   if (!artist) notFound();
 
   const songs = getSongsByArtist(artist.name)

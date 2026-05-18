@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ChapterPage({ params }: Props) {
   const { id } = await params;
-  const chapterId = id;
+  const chapterId = decodeURIComponent(id);
   const chapter = getChapterById(chapterId);
   if (!chapter) notFound();
 
