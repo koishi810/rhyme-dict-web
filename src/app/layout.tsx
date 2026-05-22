@@ -23,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/chapters" className="hover:text-indigo-400 transition-colors">分類</Link>
               <Link href="/songs" className="hover:text-indigo-400 transition-colors">曲一覧</Link>
               <Link href="/artists" className="hover:text-indigo-400 transition-colors">アーティスト</Link>
+              <Link href="/book" className="hover:text-amber-300 transition-colors" style={{ color: '#d8b14a' }}>書籍版</Link>
             </nav>
           </div>
         </header>

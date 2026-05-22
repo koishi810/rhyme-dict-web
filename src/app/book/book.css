@@ -1,0 +1,476 @@
+/* ============================================================
+   Book mode — vertical Japanese dictionary layout.
+   Self-contained styles so they don't affect the original site.
+   Each "spread" is one page of the printable dictionary.
+   ============================================================ */
+
+.book-mode {
+  --book-paper: #fdf9ef;
+  --book-band: #d8b14a;
+  --book-band-text: #1a1a1a;
+  --book-ink: #1a1a1a;
+  --book-ink-soft: #4a4a4a;
+  --book-ink-faint: #7a7a7a;
+  --book-rule: #1a1a1a;
+  --book-rule-soft: #b8b3a4;
+  --book-accent: #c63a4f;
+
+  background: #2a2a30;
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  color: var(--book-ink);
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+}
+
+.book-mode-header {
+  max-width: 980px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #d6d6dc;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+}
+
+.book-mode-header h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.book-mode-header a {
+  color: #d6d6dc;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 0.875rem;
+}
+
+.book-mode-header a:hover {
+  color: #fff;
+}
+
+/* ===== Index (list of chapters) ===== */
+
+.book-index {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.book-card {
+  background: var(--book-paper);
+  border: 1px solid #c4bca6;
+  border-radius: 4px;
+  padding: 1.25rem 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 240px;
+  text-decoration: none;
+  color: var(--book-ink);
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.book-card-band {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 100%;
+  background: var(--book-band);
+}
+
+.book-card-number {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--book-ink-soft);
+}
+
+.book-card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.book-card-axis {
+  font-size: 0.75rem;
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--book-ink-soft);
+  border-radius: 2px;
+  align-self: flex-start;
+}
+
+.book-card-subtitle {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--book-ink-soft);
+  margin: 0;
+  padding-right: 40px;
+}
+
+/* ===== Chapter (collection of spreads) ===== */
+
+.book-chapter {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* One "spread" = one page of the printed dictionary. */
+.book-spread {
+  background: var(--book-paper);
+  border-radius: 4px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  display: grid;
+  grid-template-columns: 1fr 56px;
+  /* Roughly the proportions of an A4-ish vertical page */
+  aspect-ratio: 700 / 980;
+  min-height: 540px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* The right yellow band */
+.book-band {
+  background: var(--book-band);
+  color: var(--book-band-text);
+  padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 0.75rem;
+  writing-mode: vertical-rl;
+  overflow: hidden;
+}
+
+.book-band-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5em;
+  margin: 0;
+  text-indent: 0;
+  flex-shrink: 0;
+}
+
+.book-band-subtitle {
+  font-size: 0.75rem;
+  line-height: 1.85;
+  letter-spacing: 0.06em;
+  margin: 0;
+  opacity: 0.82;
+  max-block-size: 100%;
+  overflow: hidden;
+}
+
+/* Main content area to the left of the band */
+.book-pages {
+  padding: 1.75rem 1rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ===== Overview spread ===== */
+
+.book-spread--overview {
+  background: linear-gradient(180deg, var(--book-paper) 0%, #f8f1dd 100%);
+}
+
+.book-overview {
+  writing-mode: vertical-rl;
+  padding-block: 0.5rem 1rem;
+  padding-inline: 1rem 0.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 1.25rem;
+  overflow: hidden;
+}
+
+.book-overview-chapter-no {
+  font-size: 0.78rem;
+  letter-spacing: 0.5em;
+  color: var(--book-ink-soft);
+  margin-block-end: 1.5rem;
+}
+
+.book-overview-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.book-overview-tagline {
+  font-size: 1rem;
+  line-height: 2;
+  letter-spacing: 0.08em;
+  margin: 0;
+  max-block-size: 90%;
+}
+
+.book-overview-body {
+  font-size: 0.86rem;
+  line-height: 1.95;
+  letter-spacing: 0.04em;
+  color: var(--book-ink-soft);
+  margin: 0;
+  max-block-size: 90%;
+}
+
+/* ===== Sub-category spread (the main template) ===== */
+
+.book-section {
+  display: grid;
+  grid-template-rows: 1.05fr auto 1fr;
+  row-gap: 0.6rem;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Upper: explainer in vertical writing */
+.book-explainer {
+  writing-mode: vertical-rl;
+  overflow: hidden;
+  padding-block: 0.25rem;
+  padding-inline-end: 0.25rem;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+  min-height: 0;
+}
+
+.book-explainer-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.book-explainer-caption {
+  font-size: 0.72rem;
+  color: var(--book-ink-faint);
+  margin: 0;
+  letter-spacing: 0.05em;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+.book-explainer-body {
+  font-size: 0.86rem;
+  line-height: 1.95;
+  letter-spacing: 0.04em;
+  margin: 0;
+  max-block-size: 100%;
+  text-align: justify;
+}
+
+/* Divider between explainer and examples */
+.book-divider {
+  border: 0;
+  border-top: 1px solid var(--book-rule);
+  margin: 0;
+}
+
+/* Lower: example songs + table
+   Layout: an outer horizontal-tb wrapper holds two sibling blocks side-by-side
+   1) The vertical-writing zone with example song columns (right side)
+   2) The horizontal-writing analysis table (left side)
+*/
+.book-examples {
+  writing-mode: horizontal-tb;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: stretch;
+  padding-block: 0.25rem;
+  min-height: 0;
+}
+
+.book-examples-songs {
+  writing-mode: vertical-rl;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.85rem;
+  align-items: flex-start;
+  min-height: 0;
+  overflow: hidden;
+  padding-block: 0.25rem;
+}
+
+.book-song-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-block-size: 12em;
+  max-block-size: 100%;
+  padding-inline-end: 0.6rem;
+  border-inline-end: 1px dotted #c0b9a3;
+}
+
+.book-song-block:last-child {
+  border-inline-end: none;
+  padding-inline-end: 0;
+}
+
+.book-song-lyrics {
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.book-song-lyric {
+  margin: 0;
+  line-height: 1.8;
+}
+
+.book-song-meta {
+  font-size: 0.68rem;
+  color: var(--book-ink-soft);
+  letter-spacing: 0.05em;
+  margin-block-start: 0.4rem;
+  flex-shrink: 0;
+}
+
+.book-song-credit {
+  font-size: 0.66rem;
+  color: var(--book-ink-soft);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+mark.book-rhyme {
+  color: var(--book-accent);
+  background: transparent;
+  font-weight: 700;
+}
+
+/* The small analysis table — rendered horizontally. */
+.book-table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  align-self: flex-end;
+  justify-self: end;
+  max-width: 16rem;
+}
+
+.book-table {
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--book-ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.book-table th,
+.book-table td {
+  padding: 3px 6px;
+  border-right: 1px solid var(--book-rule-soft);
+  border-bottom: 1px solid var(--book-rule-soft);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.book-table th:last-child,
+.book-table td:last-child {
+  border-right: none;
+}
+
+.book-table tr:last-child td {
+  border-bottom: none;
+}
+
+.book-table th {
+  background: rgba(216, 177, 74, 0.22);
+  font-weight: 600;
+}
+
+.book-table td.col-vowels,
+.book-table td.col-consonant {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--book-ink-soft);
+}
+
+.book-table-credit {
+  font-size: 0.65rem;
+  color: var(--book-ink-soft);
+  letter-spacing: 0.04em;
+  font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+}
+
+.book-no-sections {
+  background: var(--book-paper);
+  border: 1px dashed #c4bca6;
+  padding: 2rem;
+  border-radius: 4px;
+  text-align: center;
+  color: var(--book-ink-soft);
+  font-style: italic;
+}
+
+.book-no-sections a {
+  color: var(--book-accent);
+  text-decoration: underline;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 720px) {
+  .book-mode {
+    padding: 1rem 0.5rem 3rem;
+  }
+  .book-spread {
+    grid-template-columns: 1fr 40px;
+    aspect-ratio: auto;
+    min-height: 520px;
+  }
+  .book-band-title {
+    font-size: 1.3rem;
+    letter-spacing: 0.35em;
+  }
+  .book-band-subtitle {
+    font-size: 0.65rem;
+  }
+  .book-pages {
+    padding: 1rem 0.7rem 0.85rem 0.85rem;
+  }
+  .book-explainer-body {
+    font-size: 0.78rem;
+    line-height: 1.85;
+  }
+  .book-overview-title {
+    font-size: 1.8rem;
+    letter-spacing: 0.2em;
+  }
+}
+
+/* Force light theme inside book mode regardless of parent settings */
+.book-mode * {
+  color-scheme: light;
+}
